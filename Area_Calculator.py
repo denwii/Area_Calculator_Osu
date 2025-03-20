@@ -26,7 +26,7 @@ def record_movements(duration: int) -> NoReturn:
         start_time = time.perf_counter()
         last_time = start_time
         while time.perf_counter() - last_time < SAMPLE_RATE and time.perf_counter() - start_time <= duration:
-            time.sleep(time.perf_counter() - start_time)
+            time.sleep(time.perf_counter() - last_time)
             last_time = time.perf_counter()
 
 

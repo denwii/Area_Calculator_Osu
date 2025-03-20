@@ -24,8 +24,10 @@ def record_movements(duration: int) -> NoReturn:
         print(f"Recording started for {duration} seconds...")
         # Sampling every 10ms
         start_time = time.perf_counter()
-        while time.perf_counter() - start_time < SAMPLE_RATE:
+        last_time = start_time
+        while time.perf_counter() - last_time < SAMPLE_RATE and time.perf_counter() - start_time <= duration:
             time.sleep(time.perf_counter() - start_time)
+            last_time = time.perf_counter()
 
 
 def find_peak_near_extremes(values, min_val, max_val, threshold_percentage=5):

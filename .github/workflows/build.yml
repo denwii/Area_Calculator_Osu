@@ -10,7 +10,11 @@ on:
       - "**.md"
       - "LICENSE"
   workflow_dispatch:
-  
+
+permissions:
+  contents: write
+
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -36,14 +40,20 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Build Executable
-        run: uvx nuitka --standalone --onefile --follow-imports --output-dir="./output/" Area_Calculator.py
+        run: uvx nuitka --standalone --onefile --output-dir="./output/" Area_Calculator.py
 
       - name: Copy README
         run: cp README.md ./output/README.txt
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
+        if: !startsWith(github.ref, "refs/tags/")
         with: 
-          name: Area_Calculator
+          name: Area_Calculator (${{ matrix.os }})
           path: ./output/
           
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, "refs/tags/")
+        with:
+          files: ./output/**

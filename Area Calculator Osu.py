@@ -86,8 +86,8 @@ def main():
 
         print("Finished, calculating the area...")
         
-        corrected_tablet_size_x = calculate_size(tablet_size_x, playfield_size_x / 2, normalized_inputs_x)
-        corrected_tablet_size_y = calculate_size(tablet_size_y, playfield_size_y / 2, normalized_inputs_y)
+        corrected_tablet_size_x = calculate_size(tablet_size_x, playfield_size_x / 2, normalized_inputs_x) * 2
+        corrected_tablet_size_y = calculate_size(tablet_size_y, playfield_size_y / 2, normalized_inputs_y) * 2
 
         print("The area of the tablet is:\nWidth: " + str(corrected_tablet_size_x) + " mm\n" + "Height: " + str(corrected_tablet_size_y) + " mm\n")
 
@@ -103,8 +103,6 @@ def main():
         user_input = input("Press Enter to recalculate again or type Q to exit\n")
         if(user_input == 'Q' or user_input == 'q'):
             is_running = False
-
-        time.sleep(GRACE_PERIOD)
 
     print("Thank you for using the Area Calculator!\n")
     time.sleep(GRACE_PERIOD)

@@ -22,11 +22,12 @@ def calculate_size(current_area_size: float, normalized_playfield_size: float, i
     inputs1 = array.array('f')
 
     for input in playfield_inputs:
+        print(str(input))
         if input > max_input * 0.9:
             inputs9.append(input)
 
-        if input < min_input / 0.9:
-            inputs1.append(input)
+        if input < min_input * 0.9:
+            inputs1.append(input * -1)
 
     del max_input, min_input, playfield_inputs
 
@@ -44,7 +45,7 @@ def calculate_size(current_area_size: float, normalized_playfield_size: float, i
 
 
 def main():
-    is_running = True
+    is_running: bool = True
 
     normalized_inputs_x = array.array('f')
     normalized_inputs_y = array.array('f')
@@ -66,7 +67,7 @@ def main():
     time.sleep(GRACE_PERIOD / 5)
 
     while(is_running):
-        duration = int(input("Enter the duration: "))
+        duration: float = int(input("Enter the duration: "))
 
         input("Press Enter Key to start recording\n")
 
@@ -80,14 +81,24 @@ def main():
                 #Limit the sample rate to 10ms
                 if time.perf_counter() - last_time < SAMPLE_RATE:
                     time.sleep(SAMPLE_RATE - (time.perf_counter() - last_time))
-                normalized_inputs_x.append((pyautogui.position().x - screen_size_x / 2).__abs__())
-                normalized_inputs_y.append((pyautogui.position().y - screen_size_y / 2).__abs__())
+                
+                current_cursor_position_x, current_cursor_position_y = pyautogui.position()
+
+                normalized_current_cursor_position_x = current_cursor_position_x - (screen_size_x / 2)
+                normalized_current_cursor_position_y = current_cursor_position_y - (screen_size_y / 2)
+
+                if normalized_current_cursor_position_x < playfield_size_x * 0.515625:
+                    normalized_inputs_x.append(normalized_current_cursor_position_x)
+
+                if normalized_current_cursor_position_y < playfield_size_y * 0.515625:
+                    normalized_inputs_y.append(normalized_current_cursor_position_y)
+
                 last_time = time.perf_counter()
 
         print("Finished, calculating the area...")
         
-        corrected_tablet_size_x = calculate_size(tablet_size_x, playfield_size_x / 2, normalized_inputs_x) * 2
-        corrected_tablet_size_y = calculate_size(tablet_size_y, playfield_size_y / 2, normalized_inputs_y) * 2
+        corrected_tablet_size_x = calculate_size(tablet_size_x, playfield_size_x / 2, normalized_inputs_x)
+        corrected_tablet_size_y = calculate_size(tablet_size_y, playfield_size_y / 2, normalized_inputs_y)
 
         print("The area of the tablet is:\nWidth: " + str(corrected_tablet_size_x) + " mm\n" + "Height: " + str(corrected_tablet_size_y) + " mm\n")
 

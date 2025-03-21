@@ -22,7 +22,6 @@ def calculate_size(current_area_size: float, normalized_playfield_size: float, i
     inputs1 = array.array('f')
 
     for input in playfield_inputs:
-        print(str(input))
         if input > max_input * 0.9:
             inputs9.append(input)
 

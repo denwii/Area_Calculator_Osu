@@ -66,7 +66,7 @@ def analyze_data(
     if played_area - (playfield_size_px) < 0.1 and played_area - (playfield_size_px) > -0.1:
         return current_area_size
     
-    corrected_area: float = current_area_size * played_area / (playfield_size_px)
+    corrected_area: float = current_area_size * (played_area / playfield_size_px)
     
     return corrected_area
 

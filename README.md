@@ -1,4 +1,4 @@
-1) Set the full area (absolute mode) in your tablet driver.
+1) Set the full area in your tablet driver, NO forced proportion, (absolute mode)
 2) Make sure you have all filters disabled and your osu sensitivity is 1x
 4) Open the "Area_Calculator.exe" program.
 5) Enter the full area values (in mm) into the program.

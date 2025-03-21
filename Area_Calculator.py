@@ -1,4 +1,5 @@
 import time
+import tkinter
 from typing import Annotated
 from statistics import median
 import numpy as np
@@ -74,11 +75,7 @@ def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen
     playfield_inputs = np.array([], dtype=np.float64)
 
     for input in inputs:
-        # 120% of the half playfield size -> 1.2 * 0.5 = 0.6
-        if input - (screen_size_px / 2) < playfield_size_px * 0.6:
-            playfield_inputs.append(input - (screen_size_px / 2))
-        else:
-           playfield_inputs.append(playfield_size_px * 0.6)
+        playfield_inputs = np.append(playfield_inputs, input - (screen_size_px / 2))
 
     max_input = np.max(playfield_inputs)
     min_input = np.min(playfield_inputs)
@@ -93,7 +90,14 @@ def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen
         if input < min_input * 0.9:
             inputs1 = np.append(inputs1, input * -1)
 
+    median_9: float = 0
+    median_1: float = 0
+
+    if (not inputs9.size > 0 or not inputs1.size > 0):
+        return 0.0
+    
     median_9: float = median(inputs9)
+
     median_1: float = median(inputs1)
 
     played_area = median_9 + median_1
@@ -155,65 +159,58 @@ def analyze_data(
     rprint("===================")
 
 
-def main(
-    screen_width_px: Annotated[
-        int, typer.Option(prompt="Enter your screen width in pixels", min=600)
-    ],
-    screen_height_px: Annotated[
-        int, typer.Option(prompt="Enter your screen height in pixels", min=600)
-    ],
-    tablet_width_mm: Annotated[
-        float,
-        typer.Option(prompt="Enter your full active tablet area width in mm", min=1),
-    ],
-    tablet_height_mm: Annotated[
-        float,
-        typer.Option(prompt="Enter your full active tablet area height in mm", min=1),
-    ],
-    duration: Annotated[
-        int, typer.Option(prompt="Enter map duration in seconds", min=10)
-    ],
-):
-    innergameplay_height_px = int(screen_height_px * 0.8)
-    innergameplay_width_px = int(screen_height_px * 0.8) / 3 * 4
-    typer.confirm(
-        "Press Enter to start recording",
-        default=True,
-        show_default=False,
-        prompt_suffix=" ",
-    )
+def main():
+    window = tkinter.Tk()
+    
+    screen_width_px: int = window.winfo_screenwidth()
+    screen_height_px: int = window.winfo_screenheight()
 
-    x_input, y_input = record_movements(duration)
+    window.destroy()
 
-    analyze_data(
-        x_input=x_input,
-        y_input=y_input,
-        tablet_width_mm=tablet_width_mm,
-        tablet_height_mm=tablet_height_mm,
-        innergameplay_width_px=innergameplay_width_px,
-        innergameplay_height_px=innergameplay_height_px,
-    )
+    is_screen_dimensions_correct = typer.confirm(f"Screen resolution: {screen_width_px} x {screen_height_px}", default=True)
 
-    x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, x_input)
-    y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, y_input)
+    if not is_screen_dimensions_correct:
+        screen_width_px = typer.prompt("Enter the screen width in px", type=int)
+        screen_height_px = typer.prompt("Enter the screen height in px", type=int)
 
-    rprint("====Dark98 Calculation Results ====")
-    typer.echo(
-        "Area calculated:"
-        f" [green]{x_distance_mm:.2f} x {y_distance_mm:.2f} mm[/green]"
-    )
-    rprint("===================")
+    innergameplay_height_px = int(max(screen_height_px * 0.8, 600))
+    innergameplay_width_px = int(max(screen_height_px * 0.8 / 3 * 4, 800))
+    print(innergameplay_height_px, innergameplay_width_px)
 
-    again = typer.confirm("Want to record again?", default=True, prompt_suffix=" ")
-    if again:
-        return main(
-            screen_width_px,
-            screen_height_px,
-            tablet_width_mm,
-            tablet_height_mm,
-            duration,
+    again: bool = True
+
+    while again:
+
+        tablet_width_mm = max(typer.prompt("Enter your full active tablet area width in mm", type=float), 1)
+        tablet_height_mm = max(typer.prompt("Enter your full active tablet area height in mm", type=float), 1)
+
+        duration = max(typer.prompt("Enter map duration in seconds", type=int), 10)
+
+        x_input, y_input = record_movements(duration)
+
+        analyze_data(
+            x_input=x_input,
+            y_input=y_input,
+            tablet_width_mm=tablet_width_mm,
+            tablet_height_mm=tablet_height_mm,
+            innergameplay_width_px=innergameplay_width_px,
+            innergameplay_height_px=innergameplay_height_px,
         )
-    rprint("===================")
+
+        x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, x_input)
+        y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, y_input)
+
+        rprint("==== Dark98 Calculation Results ====")
+        rprint(
+            "Area calculated:"
+            f" [green]{x_distance_mm:.2f} x {y_distance_mm:.2f} mm[/green]"
+        )
+        rprint("===================")
+
+        again = typer.confirm("Want to record again?", default=True, prompt_suffix=" ")
+        rprint("===================")
+
+
     rprint("Thank you for using the Area Calculator!")
     rprint(
         "If you find any issues, feel free to report it on"

@@ -2,6 +2,9 @@ import time
 import array
 from typing import Annotated
 from statistics import median
+import array
+from typing import Annotated
+from statistics import median
 import numpy as np
 from pynput.mouse import Listener
 import typer
@@ -154,8 +157,8 @@ def legacy_analyze_data(
     #     f" {width_mmC_filtered:.2f} x {height_mmC_filtered:.2f} mm"
     # )
     typer.echo(
-        "Area calculated with most used points near extremes (removed soft outliers):"
-        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm"
+        "Legacy Calculation:\nArea calculated with most used points near extremes (removed soft outliers):"
+        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
     rprint("===================")
 
@@ -179,8 +182,8 @@ def main(
         int, typer.Option(prompt="Enter map duration in seconds", min=10)
     ],
 ):
-    innergameplay_height_px = int((864 / 1080) * screen_height_px)
-    innergameplay_width_px = int((1152 / 1920) * screen_width_px)
+    innergameplay_height_px = int(screen_height_px * 0.8)
+    innergameplay_width_px = int(screen_height_px * 0.8) / 3 * 4
     typer.confirm("Press Enter to start recording", default=True)
 
     record_movements(duration)
@@ -189,6 +192,13 @@ def main(
         tablet_height_mm=tablet_height_mm,
         innergameplay_width_px=innergameplay_width_px,
         innergameplay_height_px=innergameplay_height_px,
+    )
+
+    x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(input_x.tolist()))
+    y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, np.array(input_y.tolist()))
+    typer.echo(
+        "Dark98 Calculation:\nArea calculated:"
+        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
 
     x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(input_x.tolist()))

@@ -32,29 +32,6 @@ def record_movements(duration: int) -> None:
             time.sleep(SAMPLE_RATE)
 
 
-def find_peak_near_extremes(values, min_val, max_val, threshold_percentage=5):
-    """Finds the most used point near the detected min/max values"""
-    threshold_range = (max_val - min_val) * (threshold_percentage / 100)
-    near_min = values[values <= min_val + threshold_range]
-    near_max = values[values >= max_val - threshold_range]
-
-    # Remove negative values
-    near_min = near_min[near_min >= 0]
-    near_max = near_max[near_max >= 0]
-
-    if len(near_min) > 0:
-        min_peak = inputs_x.bincount(near_min.astype(int)).argmax()
-    else:
-        min_peak = int(min_val)
-
-    if len(near_max) > 0:
-        max_peak = inputs_y.bincount(near_max.astype(int)).argmax()
-    else:
-        max_peak = int(max_val)
-
-    return min_peak, max_peak
-
-
 def analyze_data(
     current_area_size: float,
     playfield_size_px: int,

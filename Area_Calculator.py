@@ -132,8 +132,8 @@ def legacy_analyze_data(
     #     f" {width_mmC_filtered:.2f} x {height_mmC_filtered:.2f} mm"
     # )
     typer.echo(
-        "Area calculated with most used points near extremes (removed soft outliers):"
-        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm"
+        "Legacy Calculation:\nArea calculated with most used points near extremes (removed soft outliers):"
+        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
     rprint("===================")
 
@@ -157,8 +157,8 @@ def main(
         int, typer.Option(prompt="Enter map duration in seconds", min=10)
     ],
 ):
-    innergameplay_height_px = int((864 / 1080) * screen_height_px)
-    innergameplay_width_px = int((1152 / 1920) * screen_width_px)
+    innergameplay_height_px = int(screen_height_px * 0.8)
+    innergameplay_width_px = int(screen_height_px * 0.8) / 3 * 4
     typer.confirm("Press Enter to start recording", default=True)
 
     record_movements(duration)
@@ -176,7 +176,7 @@ def main(
         f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
 
-    again = typer.confirm("Want to record again?", default=True, prompt_suffix=" ")
+    again = typer.confirm("Want to record again?", default=True)
     if again:
         return main(
             screen_width_px,

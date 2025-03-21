@@ -46,9 +46,10 @@ jobs:
           name: Area_Calculator
           path: ./dist/*
 
+      # https://stackoverflow.com/a/73980139
       - name: Zip files
         if: startsWith(github.ref, 'refs/tags/')
-        run: zip -r Area_Calculator.zip dist/
+        run: tar.exe acvf Area_Calculator.zip -C dist *
           
       - name: Create Release
         uses: softprops/action-gh-release@v2

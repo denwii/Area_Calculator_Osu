@@ -2,9 +2,12 @@ import time
 import array
 from typing import Annotated
 from statistics import median
+<<<<<<< HEAD
 import array
 from typing import Annotated
 from statistics import median
+=======
+>>>>>>> b3e5d66f07b36ab4f66fbc406cfaa9acf3f14cd3
 import numpy as np
 from pynput.mouse import Listener
 import typer
@@ -110,8 +113,11 @@ def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen
     return corrected_area
 
 def legacy_analyze_data(
+<<<<<<< HEAD
     x_input: np.ndarray[np.uint16],
     y_input: np.ndarray[np.uint16],
+=======
+>>>>>>> b3e5d66f07b36ab4f66fbc406cfaa9acf3f14cd3
     tablet_width_mm: float,
     tablet_height_mm: float,
     innergameplay_width_px: int,
@@ -201,6 +207,7 @@ def main(
         f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
 
+<<<<<<< HEAD
     x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(input_x.tolist()))
     y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, np.array(input_y.tolist()))
     typer.echo(
@@ -209,6 +216,9 @@ def main(
     )
 
     again = typer.confirm("Want to record again?", default=True, prompt_suffix=" ")
+=======
+    again = typer.confirm("Want to record again?", default=True)
+>>>>>>> b3e5d66f07b36ab4f66fbc406cfaa9acf3f14cd3
     if again:
         return main(
             screen_width_px,

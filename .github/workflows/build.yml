@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: "!startsWith(github.ref, 'refs/tags/')"
         with: 
-          name: Area_Calculator (${{ matrix.os }})
+          name: Area_Calculator
           path: ./dist/*
 
       - name: Zip files

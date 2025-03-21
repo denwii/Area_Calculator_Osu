@@ -24,11 +24,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -38,9 +33,7 @@ jobs:
           cache: "pip"
           
       - name: Install dependencies
-        run: |
-          pip install .
-          pip install pyinstaller
+        run: pip install . pyinstaller
 
       - name: Build Executable
         run: |

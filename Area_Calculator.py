@@ -2,12 +2,6 @@ import time
 import array
 from typing import Annotated
 from statistics import median
-<<<<<<< HEAD
-import array
-from typing import Annotated
-from statistics import median
-=======
->>>>>>> b3e5d66f07b36ab4f66fbc406cfaa9acf3f14cd3
 import numpy as np
 from pynput.mouse import Listener
 import typer

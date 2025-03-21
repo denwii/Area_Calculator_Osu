@@ -1,5 +1,4 @@
 import time
-import array
 from typing import Annotated
 from statistics import median
 import numpy as np
@@ -69,10 +68,10 @@ def find_peak_near_extremes(
     return min_peak, max_peak
 
 
-def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen_size_px: int, inputs: array):
+def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen_size_px: int, inputs: np.float64):
     """Analyzes the movement data and finds dimensions & peak points"""
 
-    playfield_inputs = array.array('f')
+    playfield_inputs = np.array([], dtype=np.float64)
 
     for input in inputs:
         # 120% of the half playfield size -> 1.2 * 0.5 = 0.6
@@ -81,18 +80,18 @@ def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen
         else:
            playfield_inputs.append(playfield_size_px * 0.6)
 
-    max_input = max(playfield_inputs)
-    min_input = min(playfield_inputs)
+    max_input = np.max(playfield_inputs)
+    min_input = np.min(playfield_inputs)
 
-    inputs9 = array.array('f')
-    inputs1 = array.array('f')
+    inputs9 = np.array([], dtype=np.float64)
+    inputs1 = np.array([], dtype=np.float64)
     
     for input in playfield_inputs:
         if input > max_input * 0.9:
-            inputs9.append(input)
+            inputs9 = np.append(inputs9, input)
 
         if input < min_input * 0.9:
-            inputs1.append(input * -1)
+            inputs1 = np.append(inputs1, input * -1)
 
     median_9: float = median(inputs9)
     median_1: float = median(inputs1)
@@ -195,8 +194,9 @@ def main(
         innergameplay_height_px=innergameplay_height_px,
     )
 
-    x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(x_input.tolist()))
-    y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, np.array(y_input.tolist()))
+    x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, x_input)
+    y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, y_input)
+
     rprint("====Dark98 Calculation Results ====")
     typer.echo(
         "Area calculated:"

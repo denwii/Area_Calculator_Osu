@@ -76,10 +76,10 @@ def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen
 
     for input in inputs:
         # 120% of the half playfield size -> 1.2 * 0.5 = 0.6
-        # if input - (screen_size_px / 2) < playfield_size_px * 0.6:
-        playfield_inputs.append(input - (screen_size_px / 2))
-        # else:
-        #   playfield_inputs.append(playfield_size_px * 0.6)
+        if input - (screen_size_px / 2) < playfield_size_px * 0.6:
+            playfield_inputs.append(input - (screen_size_px / 2))
+        else:
+           playfield_inputs.append(playfield_size_px * 0.6)
 
     max_input = max(playfield_inputs)
     min_input = min(playfield_inputs)
@@ -106,12 +106,9 @@ def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen
     
     return corrected_area
 
-def legacy_analyze_data(
-<<<<<<< HEAD
+def analyze_data(
     x_input: np.ndarray[np.uint16],
     y_input: np.ndarray[np.uint16],
-=======
->>>>>>> b3e5d66f07b36ab4f66fbc406cfaa9acf3f14cd3
     tablet_width_mm: float,
     tablet_height_mm: float,
     innergameplay_width_px: int,
@@ -157,7 +154,7 @@ def legacy_analyze_data(
     #     f" {width_mmC_filtered:.2f} x {height_mmC_filtered:.2f} mm"
     # )
     typer.echo(
-        "Legacy Calculation:\nArea calculated with most used points near extremes (removed soft outliers):"
+        "Gaussian Calculation:\nArea calculated with most used points near extremes (removed soft outliers):"
         f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
     rprint("===================")
@@ -186,33 +183,29 @@ def main(
     innergameplay_width_px = int(screen_height_px * 0.8) / 3 * 4
     typer.confirm("Press Enter to start recording", default=True)
 
+    x_input, y_input = record_movements(duration)
+
     record_movements(duration)
-    legacy_analyze_data(
+
+    analyze_data(
+        x_input=x_input,
+        y_input=y_input,
         tablet_width_mm=tablet_width_mm,
         tablet_height_mm=tablet_height_mm,
         innergameplay_width_px=innergameplay_width_px,
         innergameplay_height_px=innergameplay_height_px,
     )
 
-    x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(input_x.tolist()))
-    y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, np.array(input_y.tolist()))
+    x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(x_input.tolist()))
+    y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, np.array(y_input.tolist()))
     typer.echo(
         "Dark98 Calculation:\nArea calculated:"
         f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
-
-<<<<<<< HEAD
-    x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(input_x.tolist()))
-    y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, np.array(input_y.tolist()))
-    typer.echo(
-        "Dark98 Calculation:\nArea calculated:"
-        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
-    )
+    rprint("===================")
 
     again = typer.confirm("Want to record again?", default=True, prompt_suffix=" ")
-=======
     again = typer.confirm("Want to record again?", default=True)
->>>>>>> b3e5d66f07b36ab4f66fbc406cfaa9acf3f14cd3
     if again:
         return main(
             screen_width_px,

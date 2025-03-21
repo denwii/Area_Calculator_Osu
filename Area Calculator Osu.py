@@ -25,7 +25,7 @@ def calculate_size(current_area_size: float, normalized_playfield_size: float, i
         if input > max_input * 0.9:
             inputs9.append(input)
 
-        if input > min_input / 0.9:
+        if input < min_input / 0.9:
             inputs1.append(input)
 
     del max_input, min_input, playfield_inputs
@@ -33,7 +33,7 @@ def calculate_size(current_area_size: float, normalized_playfield_size: float, i
     median_9: float = median(inputs9)
     median_1: float = median(inputs1)
 
-    played_area = median_9.__abs__() + median_1.__abs__()
+    played_area = median_9 + median_1
 
     if played_area - (normalized_playfield_size * 2) < 0.1 and played_area - (normalized_playfield_size * 2) > -0.1:
         return current_area_size
@@ -80,8 +80,8 @@ def main():
                 #Limit the sample rate to 10ms
                 if time.perf_counter() - last_time < SAMPLE_RATE:
                     time.sleep(SAMPLE_RATE - (time.perf_counter() - last_time))
-                normalized_inputs_x.append(pyautogui.position().x - screen_size_x / 2)
-                normalized_inputs_y.append(pyautogui.position().y - screen_size_y / 2)
+                normalized_inputs_x.append((pyautogui.position().x - screen_size_x / 2).__abs__())
+                normalized_inputs_y.append((pyautogui.position().y - screen_size_y / 2).__abs__())
                 last_time = time.perf_counter()
 
         print("Finished, calculating the area...")

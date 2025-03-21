@@ -148,14 +148,10 @@ def analyze_data(
     x_distance_mm = (x_distance_px * tablet_width_mm) / innergameplay_width_px
     y_distance_mm = (y_distance_px * tablet_height_mm) / innergameplay_height_px
 
-    typer.echo("\n==== RESULTS ====")
-    # typer.echo(
-    #     "Max used area (removed soft outliers):"
-    #     f" {width_mmC_filtered:.2f} x {height_mmC_filtered:.2f} mm"
-    # )
-    typer.echo(
-        "Gaussian Calculation:\nArea calculated with most used points near extremes (removed soft outliers):"
-        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
+    rprint("\n==== Results ====")
+    rprint(
+        "Area calculated with most used points near extremes (removed soft outliers):"
+        f" [green]{x_distance_mm:.2f} x {y_distance_mm:.2f} mm [/green]"
     )
     rprint("===================")
 
@@ -181,11 +177,14 @@ def main(
 ):
     innergameplay_height_px = int(screen_height_px * 0.8)
     innergameplay_width_px = int(screen_height_px * 0.8) / 3 * 4
-    typer.confirm("Press Enter to start recording", default=True)
+    typer.confirm(
+        "Press Enter to start recording",
+        default=True,
+        show_default=False,
+        prompt_suffix=" ",
+    )
 
     x_input, y_input = record_movements(duration)
-
-    record_movements(duration)
 
     analyze_data(
         x_input=x_input,
@@ -198,14 +197,14 @@ def main(
 
     x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(x_input.tolist()))
     y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, np.array(y_input.tolist()))
+    rprint("====Dark98 Calculation Results ====")
     typer.echo(
-        "Dark98 Calculation:\nArea calculated:"
-        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
+        "Area calculated:"
+        f" [green]{x_distance_mm:.2f} x {y_distance_mm:.2f} mm[/green]"
     )
     rprint("===================")
 
     again = typer.confirm("Want to record again?", default=True, prompt_suffix=" ")
-    again = typer.confirm("Want to record again?", default=True)
     if again:
         return main(
             screen_width_px,

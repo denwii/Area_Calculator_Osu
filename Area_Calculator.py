@@ -87,7 +87,7 @@ def main(
     screen_width_px: int = tkinter.Tk().winfo_screenwidth()
     screen_height_px: int = tkinter.Tk().winfo_screenheight()
 
-    print(screen_width_px, screen_height_px)
+    tkinter.Tk().destroy()
     
     playfield_height_px = screen_height_px * 0.8
     playfield_width_px = playfield_height_px / 3 * 4

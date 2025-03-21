@@ -1,5 +1,7 @@
 import time
-from typing import Annotated, NoReturn
+import array
+from typing import Annotated
+from statistics import median
 import numpy as np
 from pynput.mouse import Listener
 import typer
@@ -10,14 +12,14 @@ input_x = np.array([], dtype=np.uint16)
 input_y = np.array([], dtype=np.uint16)
 
 
-def on_move(x: int, y: int) -> NoReturn:
+def on_move(x: int, y: int) -> None:
     """Records cursor movements"""
     global input_x, input_y
     input_x = np.append(input_x, x)
     input_y = np.append(input_y, y)
 
 
-def record_movements(duration: int) -> NoReturn:
+def record_movements(duration: int) -> None:
     """Records cursor movements for the given duration"""
     with Listener(on_move=on_move):
         time.sleep(GRACE_PERIOD)
@@ -51,9 +53,46 @@ def find_peak_near_extremes(values, min_val, max_val, threshold_percentage=5):
     return min_peak, max_peak
 
 
-def analyze_data(
-    tablet_width_mm: int,
-    tablet_height_mm: int,
+def dark98_analyze_data(current_area_size: float, playfield_size_px: int, screen_size_px: int, inputs: array):
+    """Analyzes the movement data and finds dimensions & peak points"""
+
+    playfield_inputs = array.array('f')
+
+    for input in inputs:
+        # 120% of the half playfield size -> 1.2 * 0.5 = 0.6
+        # if input - (screen_size_px / 2) < playfield_size_px * 0.6:
+        playfield_inputs.append(input - (screen_size_px / 2))
+        # else:
+        #   playfield_inputs.append(playfield_size_px * 0.6)
+
+    max_input = max(playfield_inputs)
+    min_input = min(playfield_inputs)
+
+    inputs9 = array.array('f')
+    inputs1 = array.array('f')
+    
+    for input in playfield_inputs:
+        if input > max_input * 0.9:
+            inputs9.append(input)
+
+        if input < min_input * 0.9:
+            inputs1.append(input * -1)
+
+    median_9: float = median(inputs9)
+    median_1: float = median(inputs1)
+
+    played_area = median_9 + median_1
+
+    if played_area - (playfield_size_px) < 0.1 and played_area - (playfield_size_px) > -0.1:
+        return current_area_size
+    
+    corrected_area: float = current_area_size * (played_area / playfield_size_px)
+    
+    return corrected_area
+
+def legacy_analyze_data(
+    tablet_width_mm: float,
+    tablet_height_mm: float,
     innergameplay_width_px: int,
     innergameplay_height_px: int,
 ):
@@ -85,40 +124,47 @@ def analyze_data(
     #     f" {width_mmC_filtered:.2f} x {height_mmC_filtered:.2f} mm"
     # )
     typer.echo(
-        "Area calculated with most used points near extremes (removed soft outliers):"
-        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm"
+        "Legacy Calculation:\nArea calculated with most used points near extremes (removed soft outliers):"
+        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
 
 
 def main(
     screen_width_px: Annotated[
-        int, typer.Option(prompt="Enter your screen width in pixels", min=800)
+        int, typer.Option(prompt="Enter your screen width in pixels", min=600)
     ],
     screen_height_px: Annotated[
         int, typer.Option(prompt="Enter your screen height in pixels", min=600)
     ],
     tablet_width_mm: Annotated[
-        int,
+        float,
         typer.Option(prompt="Enter your full active tablet area width in mm", min=1),
     ],
     tablet_height_mm: Annotated[
-        int,
+        float,
         typer.Option(prompt="Enter your full active tablet area height in mm", min=1),
     ],
     duration: Annotated[
         int, typer.Option(prompt="Enter map duration in seconds", min=10)
     ],
 ):
-    innergameplay_height_px = int((864 / 1080) * screen_height_px)
-    innergameplay_width_px = int((1152 / 1920) * screen_width_px)
+    innergameplay_height_px = int(screen_height_px * 0.8)
+    innergameplay_width_px = int(screen_height_px * 0.8) / 3 * 4
     typer.confirm("Press Enter to start recording", default=True)
 
     record_movements(duration)
-    analyze_data(
+    legacy_analyze_data(
         tablet_width_mm=tablet_width_mm,
         tablet_height_mm=tablet_height_mm,
         innergameplay_width_px=innergameplay_width_px,
         innergameplay_height_px=innergameplay_height_px,
+    )
+
+    x_distance_mm: float = dark98_analyze_data(tablet_width_mm, innergameplay_width_px, screen_width_px, np.array(input_x.tolist()))
+    y_distance_mm: float = dark98_analyze_data(tablet_height_mm, innergameplay_height_px, screen_height_px, np.array(input_y.tolist()))
+    typer.echo(
+        "Dark98 Calculation:\nArea calculated:"
+        f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm\n"
     )
 
     again = typer.confirm("Want to record again?", default=True)

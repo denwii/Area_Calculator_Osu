@@ -1,5 +1,6 @@
 import time
 import array
+import tkinter
 from statistics import median
 from typing import Annotated
 from pynput.mouse import Listener
@@ -10,15 +11,12 @@ GRACE_PERIOD = 5
 inputs_x = array.array('f')
 inputs_y = array.array('f')
 
-screen_width_px: int = 1920
-screen_height_px: int = 1080
-
 
 def on_move(x: int, y: int) -> None:
     """Records cursor movements"""
     global inputs_x, inputs_y, screen_width_px, screen_height_px
-    inputs_x.append(x - (screen_width_px / 2))
-    inputs_y.append(y - (screen_height_px / 2))
+    inputs_x.append(x)
+    inputs_y.append(y)
 
 
 def record_movements(duration: int) -> None:
@@ -35,6 +33,7 @@ def record_movements(duration: int) -> None:
 def analyze_data(
     current_area_size: float,
     playfield_size_px: int,
+    screen_size_px: int,
     inputs: array
 ):
     """Analyzes the movement data and finds dimensions & peak points"""
@@ -42,8 +41,9 @@ def analyze_data(
     playfield_inputs = array.array('f')
 
     for input in inputs:
-        if input < playfield_size_px * 0.6:
-            playfield_inputs.append(input)
+        # 120% of the half playfield size -> 1.2 * 0.5 = 0.6
+        if input - (screen_size_px / 2) < playfield_size_px * 0.6:
+            playfield_inputs.append(input - (screen_size_px / 2))
 
     max_input = max(playfield_inputs)
     min_input = min(playfield_inputs)
@@ -72,9 +72,6 @@ def analyze_data(
 
 
 def main(
-    screen_height_px: Annotated[
-        int, typer.Option(prompt="Enter your screen height in pixels", min=600)
-    ],
     tablet_width_mm: Annotated[
         float,
         typer.Option(prompt="Enter your full active tablet area width in mm", min=1.0),
@@ -87,21 +84,22 @@ def main(
         int, typer.Option(prompt="Enter map duration in seconds", min=10)
     ],
 ):
+    screen_width_px: int = tkinter.Tk().winfo_screenwidth()
+    screen_height_px: int = tkinter.Tk().winfo_screenheight()
+
+    print(screen_width_px, screen_height_px)
+    
     playfield_height_px = screen_height_px * 0.8
     playfield_width_px = playfield_height_px / 3 * 4
     typer.confirm("Press Enter to start recording", default=True)
 
     record_movements(duration)
 
-    x_distance_mm = analyze_data(tablet_width_mm, playfield_width_px, inputs_x)
+    x_distance_mm = analyze_data(tablet_width_mm, playfield_width_px, screen_width_px, inputs_x)
 
-    y_distance_mm = analyze_data(tablet_height_mm, playfield_height_px, inputs_y)
+    y_distance_mm = analyze_data(tablet_height_mm, playfield_height_px, screen_height_px, inputs_y)
 
     typer.echo("\n==== RESULTS ====")
-    # typer.echo(
-    #     "Max used area (removed soft outliers):"
-    #     f" {width_mmC_filtered:.2f} x {height_mmC_filtered:.2f} mm"
-    # )
     typer.echo(
         "Area calculated with most used points near extremes (removed soft outliers):"
         f" {x_distance_mm:.2f} x {y_distance_mm:.2f} mm"
@@ -110,7 +108,6 @@ def main(
     again = typer.confirm("Want to record again?", default=True)
     if again:
         return main(
-            screen_height_px,
             tablet_width_mm,
             tablet_height_mm,
             duration,

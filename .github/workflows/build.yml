@@ -17,10 +17,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest]
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -48,9 +45,13 @@ jobs:
         with: 
           name: Area_Calculator (${{ matrix.os }})
           path: ./dist/*
+
+      - name: Zip files
+        if: startsWith(github.ref, 'refs/tags/')
+        run: zip -r Area_Calculator.zip dist/
           
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./dist/Area_Calculator*
+          files: Area_Calculator.zip

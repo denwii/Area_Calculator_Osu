@@ -35,13 +35,16 @@ jobs:
         with:
           python-version-file: "pyproject.toml"
           architecture: "x64"
+          cache: "pip"
           
-      - name: Install the project
-        run: uv sync --all-extras --dev
+      - name: Install dependencies
+        run: |
+          pip install .
+          pip install pyinstaller
 
       - name: Build Executable
         run: |
-          uvx pyinstaller --onefile Area_Calculator.py
+          pyinstaller --onefile Area_Calculator.py
 
       - name: Copy README
         run: cp README.md ./dist/README.txt

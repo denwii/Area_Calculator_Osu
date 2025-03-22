@@ -175,14 +175,13 @@ def main():
 
     innergameplay_height_px = int(max(screen_height_px * 0.8, 600))
     innergameplay_width_px = int(max(screen_height_px * 0.8 / 3 * 4, 800))
-    print(innergameplay_height_px, innergameplay_width_px)
+
+    tablet_width_mm = max(typer.prompt("Enter your full active tablet area width in mm", type=float), 1)
+    tablet_height_mm = max(typer.prompt("Enter your full active tablet area height in mm", type=float), 1)
 
     again: bool = True
 
     while again:
-
-        tablet_width_mm = max(typer.prompt("Enter your full active tablet area width in mm", type=float), 1)
-        tablet_height_mm = max(typer.prompt("Enter your full active tablet area height in mm", type=float), 1)
 
         duration = max(typer.prompt("Enter map duration in seconds", type=int), 10)
 

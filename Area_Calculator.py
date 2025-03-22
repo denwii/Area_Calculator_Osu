@@ -137,13 +137,13 @@ def main(
     ],
 ):
     if screen_width_px is None:
-        screen_height_px = 1920
+        screen_width_px = 1920
     if screen_height_px is None:
         screen_height_px = 1080
     if tablet_width_mm is None:
-        tablet_width_mm = 152
+        tablet_width_mm = 152.0
     if tablet_height_mm is None:
-        tablet_height_mm = 95
+        tablet_height_mm = 95.0
     if duration is None:
         duration = 10
 

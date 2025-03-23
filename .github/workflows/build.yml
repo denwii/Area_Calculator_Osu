@@ -1,0 +1,62 @@
+name: Build Area Calculator
+
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+          architecture: "x64"
+          
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Build Executable
+        run: uv run pyinstaller --onefile Area_Calculator.py
+
+      - name: Copy README
+        run: cp README.md ./dist/README.txt
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with: 
+          name: Area_Calculator
+          path: ./dist/*
+
+      # https://stackoverflow.com/a/73980139
+      - name: Zip files
+        if: startsWith(github.ref, 'refs/tags/')
+        run: tar.exe acvf Area_Calculator.zip -C dist *
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+          files: Area_Calculator.zip

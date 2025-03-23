@@ -9,3 +9,8 @@ dependencies = [
     "pynput>=1.8.1",
     "typer>=0.15.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.12.0",
+]

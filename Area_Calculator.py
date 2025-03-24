@@ -5,6 +5,9 @@ from pynput.mouse import Listener
 import typer
 from rich.progress import track
 from rich import print as rprint
+import pick
+
+from tablets import tablets
 
 SAMPLE_RATE = 0.01
 GRACE_PERIOD = 5
@@ -117,6 +120,40 @@ def analyze_data(
     rprint("===================")
 
 
+def prompt_tablet_picker() -> tuple[float, float] | None:
+    brand, _ = pick.pick(
+        sorted(tablets.keys()),
+        title="Select your tablet brand (press Q if your tablet is not listed)",
+        indicator="→",
+        clear_screen=False,
+        quit_keys=[ord("q"), ord("Q")],
+    )
+    if not brand:
+        return
+    model, _ = pick.pick(
+        sorted(tablets[brand].keys()),
+        title="Select your tablet model (press Q if your tablet is not listed)",
+        indicator="→",
+        clear_screen=False,
+        quit_keys=[ord("q"), ord("Q")],
+    )
+    if not model:
+        return
+    width = tablets[brand][model]["width"]
+    height = tablets[brand][model]["height"]
+    return width, height
+
+
+def prompt_manual_tablet_info() -> tuple[float, float]:
+    tablet_width_mm = typer.prompt(
+        "Enter your full active tablet area width in mm", type=float
+    )
+    tablet_height_mm = typer.prompt(
+        "Enter your full active tablet area height in mm", type=float
+    )
+    return tablet_width_mm, tablet_height_mm
+
+
 def main(
     screen_width_px: Annotated[
         int, typer.Option(prompt="Enter your screen width in pixels", min=800)
@@ -124,18 +161,16 @@ def main(
     screen_height_px: Annotated[
         int, typer.Option(prompt="Enter your screen height in pixels", min=600)
     ],
-    tablet_width_mm: Annotated[
-        float,
-        typer.Option(prompt="Enter your full active tablet area width in mm", min=1),
-    ],
-    tablet_height_mm: Annotated[
-        float,
-        typer.Option(prompt="Enter your full active tablet area height in mm", min=1),
-    ],
     duration: Annotated[
         int, typer.Option(prompt="Enter map duration in seconds", min=10)
     ],
 ):
+    tablet = prompt_tablet_picker()
+
+    if tablet is None:
+        tablet_width_mm, tablet_height_mm = prompt_manual_tablet_info()
+    else:
+        tablet_width_mm, tablet_height_mm = tablet
 
     innergameplay_height_px = int((864 / 1080) * screen_height_px)
     innergameplay_width_px = int((1152 / 1920) * screen_width_px)
@@ -163,7 +198,7 @@ def main(
             screen_height_px,
             tablet_width_mm,
             tablet_height_mm,
-            duration,
+            typer.prompt("Enter map duration in seconds", default=duration, type=int),
         )
     rprint("===================")
     rprint("Thank you for using the Area Calculator!")
